@@ -1,0 +1,11 @@
+
+# These variables are required to be able deploy and run the
+# the spigot correctly
+# Rename this file 'local_env.sh' and run the following command:
+# source local_env.sh
+
+# The URL of the Jenkins that the spigot will be sending webhooks to
+export TARGET_URL="www.example.com"
+
+# The AWS URI of the S3 bucket used to store spigot code
+export SPIGOT_S3_BUCKET="s3://mybucket"
