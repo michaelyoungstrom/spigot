@@ -23,4 +23,5 @@ package: requirements
 
 deploy:
 	@echo 'Pushing $(LAMBDA_NAME) to $(SPIGOT_S3_BUCKET)'
-	@aws s3 cp $(LAMBDA_NAME).zip $(SPIGOT_S3_BUCKET)
+	@aws s3 cp $(LAMBDA_NAME).zip s3://$(SPIGOT_S3_BUCKET)
+	@aws lambda update-function-code --function-name $(LAMBDA_NAME) --s3-bucket $(SPIGOT_S3_BUCKET) --s3-key $(LAMBDA_NAME).zip
