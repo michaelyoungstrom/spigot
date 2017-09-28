@@ -27,7 +27,8 @@ quality:
 	@pylint lambdas utils
 
 test:
-	@pytest lambdas
+	@coverage run -m pytest lambdas
+	@coverage report
 
 package:
 	@cd lambdas/process_webhooks && make package

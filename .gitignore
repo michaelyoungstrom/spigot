@@ -24,5 +24,6 @@ coverage.xml
 cover/
 cover_html/
 .cache
+htmlcov
 
 local_env.sh
