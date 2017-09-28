@@ -1,0 +1,8 @@
+# General:
+click
+
+# Testing:
+pytest
+
+# Deployment:
+awscli

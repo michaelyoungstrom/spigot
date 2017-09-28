@@ -24,3 +24,5 @@ coverage.xml
 cover/
 cover_html/
 .cache
+
+local_env.sh
