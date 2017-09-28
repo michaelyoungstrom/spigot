@@ -5,6 +5,7 @@ click
 pytest
 mock
 pylint
+coverage
 
 # Deployment:
 awscli

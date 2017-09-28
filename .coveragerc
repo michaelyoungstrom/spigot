@@ -1,0 +1,6 @@
+[run]
+data_file=.coverage
+source=lambdas
+include=
+    lambdas/*/*.py
+    lambdas/*/tests/*.py
