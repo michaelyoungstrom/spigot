@@ -4,16 +4,11 @@ A webhook queueing solution for Jenkins designed with AWS.
 
 The spigot allows you to perform maintenance on Jenkins without losing any data. Previously, any webhooks sent to an instance that was being upgraded/ restarted would error out, failing to trigger the desired jobs and leaving code untested. However, with the Spigot in place, these webhooks are instead stored in a queue, and processed when Jenkins is back online.
 
-# AWS
-
-The following aws infrastructure is needed to utilize the code in this repository.
-
-## Diagram
-
+# Diagram
 
 ![Alt text](docs/spigot.jpg "AWS Infrastructure")
 
-## AWS Setup
+# AWS Setup
 
 The following will need to be configured in the API Gateway:
 
