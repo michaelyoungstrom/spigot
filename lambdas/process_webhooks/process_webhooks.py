@@ -4,7 +4,9 @@ import logging
 import os
 
 import boto3
+import botocore.session
 from botocore.vendored.requests import post
+from github3 import login
 
 logger = logging.getLogger()
 
@@ -68,6 +70,63 @@ def _get_target_queue():
         )
 
     return queue_name
+
+
+def _get_gh_token_from_s3():
+    """
+    Get the token required for posting to
+    github prs from s3.
+    The expected object is a JSON file formatted as:
+    {
+        "token": "sampletoken123"
+    }
+    """
+    session = botocore.session.get_session()
+    client = session.create_client('s3')
+
+    creds_file = client.get_object(
+        Bucket='edx-tools-credentials-hack',
+        Key='github-token.json'
+    )
+    creds = json.loads(creds_file['Body'].read())
+
+    if not creds.get("token"):
+        raise StandardError(
+            'Credentials json file needs to '
+            'contain a value for token'
+        )
+
+    return creds.get("token")
+
+
+def _post_to_gh_pr(payload, event_type, is_spigot_on):
+    """
+    Post to the github PR that the spigot is on/off.
+    """
+    on_comment = 'Jenkins is back online and the queue is ' \
+              'being drained. Testing will resume ' \
+              'momentarily.'
+    off_comment = 'Jenkins is down or under maintenance. The ' \
+              'webhook generated from this PR has ' \
+              'been queued and testing will occur soon. '
+    if is_spigot_on:
+        comment = on_comment
+    else:
+        comment = off_comment
+
+    if event_type == "pull_request":
+        gh_token = _get_gh_token_from_s3()
+
+        if payload["action"] != "closed":
+            pr_number = payload["number"]
+            repo_name = payload["repository"]["name"]
+            user = payload["repository"]["owner"]["login"]
+
+            gh = login(token=gh_token)
+            repo = gh.repository(user, repo_name)
+            pull_request_object = repo.issue(pr_number)
+
+            pull_request_object.create_comment(comment)
 
 
 def _add_gh_header(event, headers):
@@ -141,11 +200,18 @@ def lambda_handler(event, _context):
     headers = _add_gh_header(event, header)
     logger.debug("headers are: '{}'".format(headers))
 
+    event_type = headers.get('X-GitHub-Event')
+
     # Get the state of the spigot from the api variable
     spigot_state = event.get('spigot_state')
     logger.info(
         "spigot_state is set to: {}".format(spigot_state)
     )
+
+    # We had stored the payload to send in the
+    # 'body' node of the data object.
+    payload = event.get('body')
+    logger.debug("payload is: '{}'".format(payload))
 
     if spigot_state == "ON":
         # Get the url that the webhook will be sent to
@@ -157,14 +223,11 @@ def lambda_handler(event, _context):
                 "Received a ping webhook. No action required."
             )
 
-        # We had stored the payload to send in the
-        # 'body' node of the data object.
-        payload = event.get('body')
-        logger.debug("payload is: '{}'".format(payload))
-
         # Send it off!
         try:
             _result = _send_message(url, payload, headers)
+            if from_queue:
+                _post_to_gh_pr(payload, event_type, True)
         except:
             if not from_queue:
                 # The transmission was a failure, if it's not
@@ -191,6 +254,8 @@ def lambda_handler(event, _context):
         else:
             queue_name = _get_target_queue()
             _response = _send_to_queue(event, queue_name)
+
+            _post_to_gh_pr(payload, event_type, False)
 
             return (
                 "Webhook successfully sent to queue: {}".format(queue_name)
