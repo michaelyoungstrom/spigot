@@ -2,7 +2,7 @@
 
 A webhook queueing solution for Jenkins designed with AWS.
 
-The spigot allows you to perform maintenance on Jenkins without losing any data. Typically, when upgrading and restarting your instance, any incoming webhooks will receive errors and no tests will kick off. However, with the Spigot, these webhooks are instead stored in a queue, and processed when Jenkins is back online.
+The spigot allows you to perform maintenance on Jenkins without losing any data. Previously, any webhooks sent to an instance that was being upgraded/ restarted would error out, failing to trigger the desired jobs and leaving code untested. However, with the Spigot in place, these webhooks are instead stored in a queue, and processed when Jenkins is back online.
 
 The spigot can be turned off manually by running the toggle_spigot.py script with the flag --spigot_state OFF. In addition to this, the system will turn itself off if the send_from_queue lambda fails a health check on your jenkins instance.
 
