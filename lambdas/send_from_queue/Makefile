@@ -2,13 +2,17 @@ SHELL := /usr/bin/env bash
 
 LAMBDA_NAME='send_from_queue'
 
-clean:
+clean: clean.package clean.ws
+
+clean.ws:
 	@echo 'Cleaning $(LAMBDA_NAME)'
 	@rm -f *pyc
-	@rm -f $(LAMBDA_NAME).zip
 	@rm -f target
 	@find . -maxdepth 1 -mindepth 1 -type d -not -name 'test' | \
 		xargs -I {} rm -Rf {}
+
+clean.package:
+	@rm -f $(LAMBDA_NAME).zip
 
 requirements:
 	@echo 'Downloading dependencies for $(LAMBDA_NAME)'
@@ -20,6 +24,7 @@ package: requirements
 	@zip -r $(LAMBDA_NAME).zip . \
 		-x test/\* -x Makefile \
 		-x requirements.txt
+	make clean.ws
 
 deploy:
 	@echo 'Pushing $(LAMBDA_NAME) to $(SPIGOT_S3_BUCKET)'
