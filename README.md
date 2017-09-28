@@ -37,7 +37,7 @@ The following will need to be configured in the API Gateway:
     ```
 * The Method Response will need:
     * A 200 HTTP Status
-    * A 50 HTTP Status
+    * A 500 HTTP Status
 * The Integration Response will need:
     * A default Lambda Error Regex mapping to a 200 Method response status
     * A Lambda Error Regex of **(\n|.)+** mapping to a 500 Method response status
@@ -49,12 +49,14 @@ Other setup:
 * We have 2 s3 buckets that are also part of the spigot. One is used for deploying changes to lambda code, the other is for keeping credentials (such as the github token for posting on prs)
 * The send_from_queue is triggered every 5 minutes with a cloudwatch event trigger
 
-# Spigot State
+# spigot_state
 
-When the spigot is **ON**, webhooks are sent to Jenkins. When the spigot is **OFF** they are instead stored in an SQS queue for later processing.
+The **spigot_state** is an API variable that determines where webhooks are sent.
+
+When the spigot is **ON**, webhooks are sent to Jenkins, when the spigot is **OFF** they are stored in an SQS queue for later processing.
 
 In order to toggle this state manually, simply run the toggle_spigot.py script with the desired flag. For example:
-``` python
+```
 python toggle_spigot.py --toggle-state ON
 ```
 
