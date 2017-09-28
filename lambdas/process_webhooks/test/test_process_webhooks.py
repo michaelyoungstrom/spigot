@@ -88,7 +88,7 @@ class ProcessWebhooksRequestTestCase(TestCase):
 
     def test_send_message_success(self):
         with patch(
-            'process_webhooks.process_webhooks.post',
+            'lambdas.process_webhooks.process_webhooks.post',
             return_value=self.mock_response(200)
         ):
             response = _send_message('http://www.example.com', None, None)
@@ -97,7 +97,7 @@ class ProcessWebhooksRequestTestCase(TestCase):
 
     def test_send_message_error(self):
         with patch(
-            'process_webhooks.process_webhooks.post',
+            'lambdas.process_webhooks.process_webhooks.post',
             return_value=self.mock_response(500)
         ):
             with self.assertRaises(StandardError):
@@ -122,9 +122,9 @@ class LambdaHandlerTestCase(TestCase):
         'headers': {'X-GitHub-Event': 'ping'}
     }
 
-    @patch('process_webhooks.process_webhooks._get_target_url',
+    @patch('lambdas.process_webhooks.process_webhooks._get_target_url',
            return_value='http://www.example.com/endpoint/')
-    @patch('process_webhooks.process_webhooks._send_message',
+    @patch('lambdas.process_webhooks.process_webhooks._send_message',
            return_value={})
     def test_lambda_handler_to_target(self, send_msg_mock, _url_mock):
         self.event['spigot_state'] = 'ON'
@@ -135,15 +135,15 @@ class LambdaHandlerTestCase(TestCase):
             {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
         )
 
-    @patch('process_webhooks.process_webhooks._get_target_url',
+    @patch('lambdas.process_webhooks.process_webhooks._get_target_url',
            return_value='http://www.example.com/endpoint/')
-    @patch('process_webhooks.process_webhooks._send_message',
+    @patch('lambdas.process_webhooks.process_webhooks._send_message',
            side_effect=StandardError("Error!"))
-    @patch('process_webhooks.process_webhooks._is_from_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._is_from_queue',
            return_value=False)
-    @patch('process_webhooks.process_webhooks._get_target_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._get_target_queue',
            return_value='queue_name')
-    @patch('process_webhooks.process_webhooks._send_to_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._send_to_queue',
            return_value={})
     def test_lambda_handler_to_target_error(
         self, send_queue_mock, _queue_mock,
@@ -163,20 +163,20 @@ class LambdaHandlerTestCase(TestCase):
             'queue_name'
         )
 
-    @patch('process_webhooks.process_webhooks._get_target_url',
+    @patch('lambdas.process_webhooks.process_webhooks._get_target_url',
            return_value=None)
-    @patch('process_webhooks.process_webhooks._send_message',
+    @patch('lambdas.process_webhooks.process_webhooks._send_message',
            return_value={})
     def test_lambda_handler_ping(self, send_msg_mock, _url_mock):
         self.event['spigot_state'] = 'ON'
         lambda_handler(self.event, None)
         assert not send_msg_mock.called
 
-    @patch('process_webhooks.process_webhooks._get_target_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._get_target_queue',
            return_value='queue_name')
-    @patch('process_webhooks.process_webhooks._is_from_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._is_from_queue',
            return_value=False)
-    @patch('process_webhooks.process_webhooks._send_to_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._send_to_queue',
            return_value={})
     def test_lambda_handler_to_queue(
         self, send_queue_mock, _from_queue_mock, _queue_mock
@@ -188,11 +188,11 @@ class LambdaHandlerTestCase(TestCase):
             'queue_name'
         )
 
-    @patch('process_webhooks.process_webhooks._get_target_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._get_target_queue',
            return_value='queue_name')
-    @patch('process_webhooks.process_webhooks._is_from_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._is_from_queue',
            return_value=True)
-    @patch('process_webhooks.process_webhooks._send_to_queue',
+    @patch('lambdas.process_webhooks.process_webhooks._send_to_queue',
            return_value={})
     def test_lambda_handler_to_queue_from_queue(
         self, send_queue_mock, _from_queue_mock, _queue_mock
