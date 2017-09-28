@@ -43,11 +43,11 @@ class LambdaHandlerTestCase(TestCase):
             }
         )
 
-    @patch('send_from_queue.send_from_queue._get_target_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._get_target_queue',
            return_value='queue_name')
-    @patch('send_from_queue.send_from_queue._get_queue_object',
+    @patch('lambdas.send_from_queue.send_from_queue._get_queue_object',
            return_value={})
-    @patch('send_from_queue.send_from_queue._is_queue_empty',
+    @patch('lambdas.send_from_queue.send_from_queue._is_queue_empty',
            return_value=True)
     def test_lambda_handler_empty_queue(
         self, _queue_empty_mock, _queue_object, _queue_mock
@@ -55,24 +55,24 @@ class LambdaHandlerTestCase(TestCase):
         response = lambda_handler(None, None)
         self.assertEqual(response, "No visible messages in the queue to clear")
 
-    @patch('send_from_queue.send_from_queue._get_target_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._get_target_queue',
            return_value='queue_name')
-    @patch('send_from_queue.send_from_queue._get_queue_object',
+    @patch('lambdas.send_from_queue.send_from_queue._get_queue_object',
            return_value={})
-    @patch('send_from_queue.send_from_queue._get_api_url',
+    @patch('lambdas.send_from_queue.send_from_queue._get_api_url',
            return_value='https://api.com')
-    @patch('send_from_queue.send_from_queue._is_queue_empty',
+    @patch('lambdas.send_from_queue.send_from_queue._is_queue_empty',
            side_effect=[False, False, True])
-    @patch('send_from_queue.send_from_queue._get_from_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._get_from_queue',
            return_value=[mock_message()])
-    @patch('send_from_queue.send_from_queue._delete_from_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._delete_from_queue',
            return_value={})
     def test_lambda_handler_with_queue(
         self, delete_mock, msg_from_queue_mock,
         queue_empty_mock, _api_mock, _queue_object, _queue_mock
     ):
         with patch(
-            'send_from_queue.send_from_queue.post',
+            'lambdas.send_from_queue.send_from_queue.post',
             return_value=self.mock_response(200)
         ):
             lambda_handler(None, None)
@@ -80,24 +80,24 @@ class LambdaHandlerTestCase(TestCase):
             self.assertEqual(msg_from_queue_mock.call_count, 1)
             self.assertEqual(delete_mock.call_count, 1)
 
-    @patch('send_from_queue.send_from_queue._get_target_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._get_target_queue',
            return_value='queue_name')
-    @patch('send_from_queue.send_from_queue._get_queue_object',
+    @patch('lambdas.send_from_queue.send_from_queue._get_queue_object',
            return_value={})
-    @patch('send_from_queue.send_from_queue._get_api_url',
+    @patch('lambdas.send_from_queue.send_from_queue._get_api_url',
            return_value='https://api.com')
-    @patch('send_from_queue.send_from_queue._is_queue_empty',
+    @patch('lambdas.send_from_queue.send_from_queue._is_queue_empty',
            side_effect=[False, False, True])
-    @patch('send_from_queue.send_from_queue._get_from_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._get_from_queue',
            return_value=[mock_message()])
-    @patch('send_from_queue.send_from_queue._delete_from_queue',
+    @patch('lambdas.send_from_queue.send_from_queue._delete_from_queue',
            return_value={})
     def test_lambda_handler_with_queue_error(
         self, _delete_mock, msg_from_queue_mock,
         queue_empty_mock, _api_mock, _queue_object, _queue_mock
     ):
         with patch(
-            'send_from_queue.send_from_queue.post',
+            'lambdas.send_from_queue.send_from_queue.post',
             return_value=self.mock_response(500)
         ):
             with self.assertRaises(StandardError):

@@ -3,6 +3,8 @@ click
 
 # Testing:
 pytest
+mock
+pylint
 
 # Deployment:
 awscli
