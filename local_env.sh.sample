@@ -8,4 +8,4 @@
 export TARGET_URL="www.example.com"
 
 # The AWS URI of the S3 bucket used to store spigot code
-export SPIGOT_S3_BUCKET="s3://mybucket"
+export SPIGOT_S3_BUCKET="mybucket"
