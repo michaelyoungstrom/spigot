@@ -4,8 +4,6 @@ A webhook queueing solution for Jenkins designed with AWS.
 
 The spigot allows you to perform maintenance on Jenkins without losing any data. Previously, any webhooks sent to an instance that was being upgraded/ restarted would error out, failing to trigger the desired jobs and leaving code untested. However, with the Spigot in place, these webhooks are instead stored in a queue, and processed when Jenkins is back online.
 
-The spigot can be turned off manually by running the toggle_spigot.py script with the flag --spigot_state OFF. In addition to this, the system will turn itself off if the send_from_queue lambda fails a health check on your jenkins instance.
-
 # AWS
 
 The following aws infrastructure is needed to utilize the code in this repository.
@@ -50,3 +48,14 @@ The Lambdas will need:
 Other setup:
 * We have 2 s3 buckets that are also part of the spigot. One is used for deploying changes to lambda code, the other is for keeping credentials (such as the github token for posting on prs)
 * The send_from_queue is triggered every 5 minutes with a cloudwatch event trigger
+
+# Spigot State
+
+When the spigot is **ON**, webhooks are sent to Jenkins. When the spigot is **OFF** they are instead stored in an SQS queue for later processing.
+
+In order to toggle this state manually, simply run the toggle_spigot.py script with the desired flag. For example:
+``` python
+python toggle_spigot.py --toggle-state ON
+```
+
+In addition to this script, the spigot is also capable of turning itself off. This occurs when the Jenkins healthcheck inside the send_from_queue lambda function fails.
